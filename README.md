@@ -67,6 +67,19 @@ npm install
 npm start
 ```
 
+## Deployment
+
+This project is set up to be deployed to GitHub Pages.
+
+1. Automatic deployment:
+   - The project uses GitHub Actions to automatically deploy to GitHub Pages when changes are pushed to the main branch.
+   - You can view the deployed site at: https://afmontes.github.io/canada-crs-calculator
+
+2. Manual deployment (if needed):
+```
+npm run deploy
+```
+
 ## Disclaimer
 
 This calculator is provided for informational purposes only. While we strive to keep the calculation algorithm up to date with the latest IRCC criteria, the official score should be verified using the tools provided by the Government of Canada.
