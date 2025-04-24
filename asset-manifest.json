@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/canada-crs-calculator/static/css/main.834a5cd5.css",
+    "main.js": "/canada-crs-calculator/static/js/main.b94b38d7.js",
+    "index.html": "/canada-crs-calculator/index.html",
+    "main.834a5cd5.css.map": "/canada-crs-calculator/static/css/main.834a5cd5.css.map",
+    "main.b94b38d7.js.map": "/canada-crs-calculator/static/js/main.b94b38d7.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.834a5cd5.css",
+    "static/js/main.b94b38d7.js"
+  ]
+}
