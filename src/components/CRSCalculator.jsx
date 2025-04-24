@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 // Updated April 2025 to reflect removal of arranged employment points
 const CRSCalculator = () => {
-  const [profiles, setProfiles] = useState([
-    { name: 'Profile 1', totalScore: 0, scores: {}, inputs: getDefaultInputs() },
-    { name: 'Profile 2', totalScore: 0, scores: {}, inputs: getDefaultInputs() },
-    { name: 'Profile 3', totalScore: 0, scores: {}, inputs: getDefaultInputs() }
-  ]);
+  const [profiles, setProfiles] = useState(() => {
+    // Try to load profiles from localStorage
+    const savedProfiles = localStorage.getItem('crsProfiles');
+    if (savedProfiles) {
+      return JSON.parse(savedProfiles);
+    }
+    // Default profiles if nothing is saved
+    return [
+      { name: 'Profile 1', totalScore: 0, scores: {}, inputs: getDefaultInputs() },
+      { name: 'Profile 2', totalScore: 0, scores: {}, inputs: getDefaultInputs() },
+      { name: 'Profile 3', totalScore: 0, scores: {}, inputs: getDefaultInputs() }
+    ];
+  });
 
   function getDefaultInputs() {
     return {
@@ -53,6 +63,9 @@ const CRSCalculator = () => {
       newProfiles[index] = { ...profile, scores, totalScore };
     });
     setProfiles(newProfiles);
+    
+    // Save to localStorage whenever profiles change
+    localStorage.setItem('crsProfiles', JSON.stringify(newProfiles));
   }, [profiles.map(p => JSON.stringify(p.inputs))]);
 
   const handleInputChange = (profileIndex, category, value) => {
@@ -771,53 +784,123 @@ const CRSCalculator = () => {
     );
   };
 
-  return (
-    <div className="container mx-auto p-4">
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-center">CRS Score Calculator</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-blue-800 font-medium">2025 CRS Update:</p>
-                <p className="text-sm text-blue-700">As of March 25, 2025, IRCC has removed CRS points for arranged employment (job offers). Previously, candidates received 50 or 200 additional points for job offers. This calculator has been updated to reflect this change.</p>
-              </div>
-            </div>
-          </div>
-          
-          <p className="text-center mb-6">
-            Compare up to three different scenarios to see how changes affect your Comprehensive Ranking System (CRS) score.
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-4">
-            {profiles.map((profile, index) => (
-              <Card key={index} className="h-full">
-                <CardHeader>
-                  <CardTitle className="text-lg">{profile.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {renderProfileInputs(index)}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const currentDate = new Date().toLocaleDateString();
+    
+    // Add title and date
+    doc.setFontSize(18);
+    doc.text('Canada CRS Calculator Results', 14, 22);
+    doc.setFontSize(11);
+    doc.text(`Generated on: ${currentDate}`, 14, 30);
+    
+    // Create table data for scores
+    const tableColumn = ['Category', ...profiles.map(p => p.name)];
+    const tableRows = [
+      ['Age', ...profiles.map(p => p.scores.age)],
+      ['Education', ...profiles.map(p => p.scores.education)],
+      ['First Language', ...profiles.map(p => p.scores.firstLanguage)],
+      ['Second Language', ...profiles.map(p => p.scores.secondLanguage)],
+      ['Canadian Work Experience', ...profiles.map(p => p.scores.canadianWorkExperience)],
+      ['Spouse Factors', ...profiles.map(p => p.scores.spouseFactors)],
+      ['Skill Transferability', ...profiles.map(p => p.scores.skillTransferability)],
+      ['Additional Points', ...profiles.map(p => p.scores.additionalPoints)],
+      ['Total Score', ...profiles.map(p => p.totalScore)],
+    ];
+    
+    // Add scores table
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [66, 139, 202] },
+    });
+    
+    // Add interpretation guide
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(14);
+    doc.text('Interpretation Guide for 2025:', 14, finalY);
+    doc.setFontSize(10);
+    doc.text('• 600+ points: Very high chance of invitation in most draws', 20, finalY + 10);
+    doc.text('• 520-600 points: Good chance in general draws', 20, finalY + 16);
+    doc.text('• 470-520 points: Moderate chance in CEC-specific draws', 20, finalY + 22);
+    doc.text('• 410-470 points: Possible in category-based or program-specific draws', 20, finalY + 28);
+    doc.text('• Below 410 points: Consider Provincial Nominee Program (PNP) or alternative pathways', 20, finalY + 34);
+    
+    doc.setFontSize(9);
+    doc.text('Note: With the removal of arranged employment points in March 2025, CRS scores have generally decreased.', 14, finalY + 44);
+    
+    // Add profile details
+    profiles.forEach((profile, index) => {
+      if (index > 0) doc.addPage();
+      const startY = index > 0 ? 20 : finalY + 55;
       
+      doc.setFontSize(14);
+      doc.text(`${profile.name} Details:`, 14, startY);
+      
+      const inputs = profile.inputs;
+      const detailsData = [
+        ['Age', inputs.age],
+        ['Has Spouse', inputs.hasSpouse ? 'Yes' : 'No'],
+        ['Education Level', inputs.educationLevel],
+        ['First Language (IELTS/TEF)', `S:${inputs.firstLanguage.speaking}, L:${inputs.firstLanguage.listening}, R:${inputs.firstLanguage.reading}, W:${inputs.firstLanguage.writing}`],
+        ['Canadian Work Experience', `${inputs.canadianWorkExperience} years`],
+        ['Foreign Work Experience', `${inputs.foreignWorkExperience} years`],
+        ['Certificate of Qualification', inputs.certificateOfQualification ? 'Yes' : 'No'],
+        ['Has Sibling in Canada', inputs.hasSiblingInCanada ? 'Yes' : 'No'],
+        ['French Language Proficiency', inputs.frenchLanguage],
+        ['Canadian Education', inputs.canadianEducation],
+        ['Provincial Nomination', inputs.provincialNomination ? 'Yes' : 'No']
+      ];
+      
+      if (inputs.hasSpouse) {
+        detailsData.push(
+          ['Spouse Education Level', inputs.spouseEducationLevel],
+          ['Spouse Language', `S:${inputs.spouseLanguage.speaking}, L:${inputs.spouseLanguage.listening}, R:${inputs.spouseLanguage.reading}, W:${inputs.spouseLanguage.writing}`],
+          ['Spouse Canadian Work Experience', `${inputs.spouseCanadianWorkExperience} years`]
+        );
+      }
+      
+      doc.autoTable({
+        body: detailsData,
+        startY: startY + 10,
+        theme: 'plain',
+        styles: { fontSize: 10, cellPadding: 3 },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 } }
+      });
+    });
+    
+    // Save the PDF
+    doc.save('CRS_Calculator_Results.pdf');
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-center">Results Comparison</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Canada CRS Calculator (2025)</CardTitle>
+          <p className="text-center text-gray-600">Calculate your Comprehensive Ranking System score for Express Entry</p>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+          <Tabs defaultValue="profile0">
+            <TabsList className="grid grid-cols-3 mb-4">
+              {profiles.map((profile, index) => (
+                <TabsTrigger key={index} value={`profile${index}`}>{profile.name}</TabsTrigger>
+              ))}
+            </TabsList>
+            
+            {profiles.map((profile, index) => (
+              <TabsContent key={index} value={`profile${index}`}>
+                {renderProfileInputs(index)}
+              </TabsContent>
+            ))}
+          </Tabs>
+          
+          <div className="mt-8">
+            <h2 className="text-xl font-bold mb-4">Score Comparison</h2>
+            <table className="w-full border-collapse border">
               <thead>
                 <tr>
                   <th className="border p-2 text-left">Factor</th>
@@ -883,6 +966,29 @@ const CRSCalculator = () => {
                 </tr>
               </tbody>
             </table>
+          </div>
+          
+          <div className="mt-6 flex justify-between items-center">
+            <button 
+              onClick={exportToPDF} 
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Export to PDF
+            </button>
+            
+            <button 
+              onClick={() => {
+                localStorage.removeItem('crsProfiles');
+                setProfiles([
+                  { name: 'Profile 1', totalScore: 0, scores: {}, inputs: getDefaultInputs() },
+                  { name: 'Profile 2', totalScore: 0, scores: {}, inputs: getDefaultInputs() },
+                  { name: 'Profile 3', totalScore: 0, scores: {}, inputs: getDefaultInputs() }
+                ]);
+              }} 
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Reset All Data
+            </button>
           </div>
           
           <div className="mt-6">

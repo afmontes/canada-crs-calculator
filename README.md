@@ -9,6 +9,8 @@ An interactive Comprehensive Ranking System (CRS) calculator for Canadian Expres
 - Detailed breakdown of points by category
 - Visual comparison table for easy analysis
 - Updated for the March 25, 2025 Express Entry changes (removal of arranged employment points)
+- **Export results to PDF** for saving or sharing your calculations
+- **Automatic data saving** - your inputs are saved in your browser and restored when you return
 
 ## Scoring Categories Included
 
@@ -43,11 +45,14 @@ The calculator can be used for:
 2. Comparing how different factors would affect your score
 3. Planning strategies to improve your score
 4. Understanding the impact of the 2025 changes on your Express Entry profile
+5. Exporting your results to PDF for record-keeping or sharing
+6. Your data is automatically saved in your browser's local storage
 
 ## Requirements
 
 - React.js
 - Tailwind CSS
+- jsPDF (for PDF export functionality)
 
 ## Installation
 
