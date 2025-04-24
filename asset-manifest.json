@@ -1,13 +1,19 @@
 {
   "files": {
-    "main.css": "/canada-crs-calculator/static/css/main.834a5cd5.css",
-    "main.js": "/canada-crs-calculator/static/js/main.b94b38d7.js",
+    "main.css": "/canada-crs-calculator/static/css/main.2fb35125.css",
+    "main.js": "/canada-crs-calculator/static/js/main.44b7f850.js",
+    "static/js/239.0fa7a0aa.chunk.js": "/canada-crs-calculator/static/js/239.0fa7a0aa.chunk.js",
+    "static/js/213.9699f966.chunk.js": "/canada-crs-calculator/static/js/213.9699f966.chunk.js",
+    "static/js/732.e9e352f5.chunk.js": "/canada-crs-calculator/static/js/732.e9e352f5.chunk.js",
     "index.html": "/canada-crs-calculator/index.html",
-    "main.834a5cd5.css.map": "/canada-crs-calculator/static/css/main.834a5cd5.css.map",
-    "main.b94b38d7.js.map": "/canada-crs-calculator/static/js/main.b94b38d7.js.map"
+    "main.2fb35125.css.map": "/canada-crs-calculator/static/css/main.2fb35125.css.map",
+    "main.44b7f850.js.map": "/canada-crs-calculator/static/js/main.44b7f850.js.map",
+    "239.0fa7a0aa.chunk.js.map": "/canada-crs-calculator/static/js/239.0fa7a0aa.chunk.js.map",
+    "213.9699f966.chunk.js.map": "/canada-crs-calculator/static/js/213.9699f966.chunk.js.map",
+    "732.e9e352f5.chunk.js.map": "/canada-crs-calculator/static/js/732.e9e352f5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.834a5cd5.css",
-    "static/js/main.b94b38d7.js"
+    "static/css/main.2fb35125.css",
+    "static/js/main.44b7f850.js"
   ]
 }
